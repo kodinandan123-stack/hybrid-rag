@@ -1,0 +1,10 @@
+sentence-transformers
+qdrant-client
+rank_bm25
+fastapi
+uvicorn
+ragas
+anthropic
+python-dotenv
+pypdf
+langchain-text-splitters
