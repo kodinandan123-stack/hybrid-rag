@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Hybrid RAG Chat</title>
+  <style>
+    body { font-family: sans-serif; max-width: 720px; margin: 2rem auto; }
+    #messages { border: 1px solid #ccc; border-radius: 6px; padding: 1rem; min-height: 300px; margin-bottom: 1rem; }
+    .msg { margin-bottom: 0.75rem; }
+    .msg.user { font-weight: bold; }
+    .sources { font-size: 0.85rem; color: #555; }
+    form { display: flex; gap: 0.5rem; }
+    input[type="text"] { flex: 1; padding: 0.5rem; }
+    button { padding: 0.5rem 1rem; }
+  </style>
+</head>
+<body>
+  <h1>Hybrid RAG Chat</h1>
+  <div id="messages"></div>
+  <form id="query-form">
+    <input type="text" id="query-input" placeholder="Ask a question..." autocomplete="off" />
+    <button type="submit">Send</button>
+  </form>
+
+  <script>
+    const API_URL = "/query";
+    const messagesEl = document.getElementById("messages");
+    const formEl = document.getElementById("query-form");
+    const inputEl = document.getElementById("query-input");
+
+    function appendMessage(text, className) {
+      const div = document.createElement("div");
+      div.className = `msg ${className}`;
+      div.textContent = text;
+      messagesEl.appendChild(div);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+      return div;
+    }
+
+    formEl.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const query = inputEl.value.trim();
+      if (!query) return;
+
+      appendMessage(query, "user");
+      inputEl.value = "";
+      const pending = appendMessage("Thinking...", "assistant");
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query, top_k: 5 }),
+        });
+        const data = await response.json();
+        pending.textContent = data.answer;
+
+        if (data.sources && data.sources.length) {
+          const sourcesEl = document.createElement("div");
+          sourcesEl.className = "sources";
+          sourcesEl.textContent = "Sources: " + data.sources.map((s) => s.source).join(", ");
+          messagesEl.appendChild(sourcesEl);
+        }
+      } catch (err) {
+        pending.textContent = "Error: could not reach the API.";
+      }
+    });
+  </script>
+</body>
+</html>
