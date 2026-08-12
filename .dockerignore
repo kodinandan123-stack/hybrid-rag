@@ -1,0 +1,29 @@
+# Version control
+.git/
+.github/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+
+# Test and lint caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Editor/OS
+.vscode/
+.DS_Store
+
+# Environment and secrets
+.env
+
+# Docs and local data not needed in the image
+docs/
+corpus/
+*.md
+!README.md
