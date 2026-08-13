@@ -2,8 +2,8 @@
 
 from typing import List, Dict, Any, Optional
 
-from fastapi import FastAPI
-from pydantic import BaseModel
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, Field
 
 from retrieval.dense import DenseRetriever
 from retrieval.sparse import SparseRetriever
@@ -20,7 +20,7 @@ _generator = Generator()
 
 class QueryRequest(BaseModel):
     query: str
-    top_k: int = 5
+    top_k: int = Field(default=5, gt=0, le=50)
 
 
 class QueryResponse(BaseModel):
@@ -30,13 +30,18 @@ class QueryResponse(BaseModel):
 
 def _get_hybrid_retriever() -> HybridRetriever:
     if _hybrid is None:
-        raise RuntimeError("Corpus not indexed yet; call POST /index first")
+        raise HTTPException(
+            status_code=400,
+            detail="Corpus not indexed yet; call POST /index first",
+        )
     return _hybrid
 
 
 @app.post("/index")
 def index_chunks(chunks: List[Dict[str, Any]]) -> Dict[str, int]:
     """Index a batch of chunk dicts into both the dense and sparse retrievers."""
+    if not chunks:
+        raise HTTPException(status_code=400, detail="chunks must not be empty")
     global _sparse, _hybrid
     _dense.index(chunks)
     _sparse = SparseRetriever(chunks)
