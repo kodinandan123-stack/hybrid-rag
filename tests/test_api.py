@@ -30,10 +30,21 @@ def test_index_indexes_chunks_and_returns_count():
     mock_dense.index.assert_called_once_with(chunks)
 
 
-def test_query_before_index_returns_server_error():
+def test_query_before_index_returns_400():
     main_module._hybrid = None
     response = client.post("/query", json={"query": "what is RAG?"})
-    assert response.status_code == 500
+    assert response.status_code == 400
+    assert "not indexed" in response.json()["detail"]
+
+
+def test_index_with_empty_chunks_returns_400():
+    response = client.post("/index", json=[])
+    assert response.status_code == 400
+
+
+def test_query_with_invalid_top_k_returns_422():
+    response = client.post("/query", json={"query": "what is RAG?", "top_k": 0})
+    assert response.status_code == 422
 
 
 def test_query_returns_answer_and_sources():
