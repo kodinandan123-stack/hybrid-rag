@@ -1,8 +1,19 @@
-"""Answer generation grounded in retrieved context, using the Anthropic API."""
+"""
+generator.py
 
-from typing import List, Dict, Any
+Grounded answer generation using the Anthropic Messages API. Builds a
+context block from retrieved chunks and prompts Claude to answer using
+ONLY the provided context, citing sources in its response.
+"""
+
+from __future__ import annotations
+
 import os
+from typing import Any, Dict, List, Optional
+
 import anthropic
+
+from config.settings import get_settings
 
 
 SYSTEM_PROMPT = (
@@ -11,11 +22,13 @@ SYSTEM_PROMPT = (
     "Always cite the source of each claim using the provided chunk metadata."
 )
 
+
 class Generator:
     """Synthesizes grounded answers from a query and retrieved context chunks."""
 
-    def __init__(self, model: str = "claude-sonnet-4-5", api_key: str = None):
-        self.model = model
+    def __init__(self, model: Optional[str] = None, api_key: Optional[str] = None):
+        settings = get_settings()
+        self.model = model or settings.anthropic_model
         self.client = anthropic.Anthropic(api_key=api_key or os.environ.get("ANTHROPIC_API_KEY"))
 
     def _format_context(self, chunks: List[Dict[str, Any]]) -> str:
@@ -26,6 +39,7 @@ class Generator:
         return "\n\n".join(blocks)
 
     def generate(self, query: str, chunks: List[Dict[str, Any]], max_tokens: int = 1024) -> str:
+        """Generate a grounded answer for query using the provided context chunks."""
         context = self._format_context(chunks)
         user_prompt = f"Context:\n{context}\n\nQuestion: {query}"
         response = self.client.messages.create(
