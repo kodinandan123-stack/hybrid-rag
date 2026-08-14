@@ -1,10 +1,20 @@
-"""Hybrid retriever combining dense and sparse search results via reciprocal rank fusion."""
+"""
+hybrid.py
 
-from typing import List, Dict, Any
+Hybrid retriever combining dense and sparse search results via Reciprocal
+Rank Fusion (RRF). Accepts any combination of ranked hit lists and fuses
+them into a single ranking without requiring score normalisation across
+retrieval strategies.
+"""
+
+from __future__ import annotations
+
 from collections import defaultdict
+from typing import Any, Dict, List
 
 from retrieval.dense import DenseRetriever
 from retrieval.sparse import SparseRetriever
+
 
 class HybridRetriever:
     """Fuses dense and sparse retrieval rankings using Reciprocal Rank Fusion (RRF)."""
@@ -23,11 +33,12 @@ class HybridRetriever:
         return scores
 
     def search(self, query: str, top_k: int = 5, candidate_k: int = 20) -> List[Dict[str, Any]]:
+        """Return the top_k chunks most relevant to query, fused from dense and sparse hits."""
         dense_hits = self.dense.search(query, top_k=candidate_k)
         sparse_hits = self.sparse.search(query, top_k=candidate_k)
         fused_scores = self._rrf_scores([dense_hits, sparse_hits])
 
-        by_key = {}
+        by_key: Dict[str, Dict[str, Any]] = {}
         for item in dense_hits + sparse_hits:
             key = item.get("chunk_id") or item.get("text")
             by_key[key] = item
