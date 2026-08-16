@@ -1,0 +1,10 @@
+{"question": "What vector store does the pipeline use?", "ground_truth": "Qdrant"}
+{"question": "Which algorithm is used to fuse dense and sparse retrieval results?", "ground_truth": "Reciprocal Rank Fusion (RRF)"}
+{"question": "What embedding model is used for dense retrieval?", "ground_truth": "all-MiniLM-L6-v2"}
+{"question": "What is the default chunk size?", "ground_truth": "500 characters"}
+{"question": "How many characters of overlap exist between consecutive chunks?", "ground_truth": "50 characters"}
+{"question": "Which API is used for answer generation?", "ground_truth": "Anthropic Messages API"}
+{"question": "What file formats does the loader support?", "ground_truth": "PDF and Markdown"}
+{"question": "Which endpoint indexes corpus chunks into the retrievers?", "ground_truth": "/index"}
+{"question": "Which endpoint retrieves an answer for a question?", "ground_truth": "/query"}
+{"question": "What ragas metric measures whether generated answers are grounded in retrieved context?", "ground_truth": "Faithfulness"}
