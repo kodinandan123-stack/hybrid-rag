@@ -41,3 +41,19 @@ corpus files -> loader -> chunker -> [dense index, sparse index]
                                             |
 question -> hybrid retriever (RRF) -> generator -> answer + sources
 ```
+
+
+## Configuration
+
+Key parameters are centralised in `config/settings.py` and can be overridden via environment variables or the `.env` file:
+
+| Parameter | Default | Description |
+|---|---|---|
+| `CHUNK_SIZE` | 500 | Token target per chunk |
+| `CHUNK_OVERLAP` | 50 | Overlap between adjacent chunks |
+| `TOP_K_DENSE` | 10 | Dense retriever candidate count |
+| `TOP_K_SPARSE` | 10 | BM25 retriever candidate count |
+| `RRF_K` | 60 | RRF constant (higher = less rank-sensitive) |
+| `RERANK_TOP_N` | 5 | Chunks passed to the generator after reranking |
+| `EMBEDDING_MODEL` | `all-MiniLM-L6-v2` | Sentence-transformers model for dense embeddings |
+| `RERANK_MODEL` | `cross-encoder/ms-marco-MiniLM-L-6-v2` | Cross-encoder for reranking |
