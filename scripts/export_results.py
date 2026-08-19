@@ -34,5 +34,29 @@ def main(argv=None):
             fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
     return 0 if errors == 0 else 1
 
+
+def export_csv(jsonl_path: str, csv_path: str) -> None:
+        """Convert an existing JSONL results file to CSV for spreadsheet analysis."""
+        import csv
+        rows = []
+        with open(jsonl_path, encoding="utf-8") as f:
+                    for line in f:
+                                    rec = json.loads(line)
+                                    rows.append({
+                                                        "query": rec.get("query", ""),
+                                                        "answer": rec.get("answer", ""),
+                                                        "latency_ms": rec.get("latency_ms", ""),
+                                                        "num_chunks": len(rec.get("chunks", [])),
+                                                        "error": rec.get("error", ""),
+                                    })
+                            with open(csv_path, "w", newline="", encoding="utf-8") as f:
+                                        writer = csv.DictWriter(f, fieldnames=["query", "answer", "latency_ms", "num_chunks", "error"])
+                                        writer.writeheader()
+                                        writer.writerows(rows)
+
+
+if __name__ == "__main__":
+        raise SystemExit(main())
+
 if __name__ == "__main__":
     sys.exit(main())
