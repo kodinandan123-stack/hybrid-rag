@@ -1,0 +1,23 @@
+{
+  "dense": {
+    "avg_latency_s": 0.0421,
+    "p95_latency_s": 0.0613,
+    "avg_recall_at_k": 0.82,
+    "num_queries": 50,
+    "k": 10
+  },
+  "sparse": {
+    "avg_latency_s": 0.0187,
+    "p95_latency_s": 0.0274,
+    "avg_recall_at_k": 0.71,
+    "num_queries": 50,
+    "k": 10
+  },
+  "hybrid": {
+    "avg_latency_s": 0.0534,
+    "p95_latency_s": 0.0781,
+    "avg_recall_at_k": 0.91,
+    "num_queries": 50,
+    "k": 10
+  }
+}
