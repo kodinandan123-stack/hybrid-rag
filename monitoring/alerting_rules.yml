@@ -1,0 +1,37 @@
+groups:
+  - name: hybrid_rag_alerts
+    interval: 30s
+    rules:
+      - alert: HighQueryLatency
+        expr: histogram_quantile(0.95, rate(rag_query_latency_seconds_bucket[5m])) > 3
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High query latency (p95 > 3s)"
+          description: "95th percentile latency is {{ $value }}s"
+
+      - alert: HighErrorRate
+        expr: rate(rag_queries_total{status="error"}[5m]) / rate(rag_queries_total[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate (> 5%)"
+          description: "Error rate is {{ $value | humanizePercentage }}"
+
+      - alert: LowCacheHitRate
+        expr: rate(rag_cache_hits_total[5m]) / (rate(rag_cache_hits_total[5m]) + rate(rag_cache_misses_total[5m])) < 0.3
+        for: 5m
+        labels:
+          severity: info
+        annotations:
+          summary: "Cache hit rate below 30%"
+
+      - alert: IndexSizeDropped
+        expr: rag_index_document_count < 100
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Index document count critically low"
