@@ -1,0 +1,61 @@
+version: 1
+disable_existing_loggers: false
+
+formatters:
+  standard:
+      format: "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+          datefmt: "%Y-%m-%dT%H:%M:%S"
+            json:
+                (): pythonjsonlogger.jsonlogger.JsonFormatter
+                    format: "%(asctime)s %(name)s %(levelname)s %(message)s"
+                        datefmt: "%Y-%m-%dT%H:%M:%S"
+
+                        handlers:
+                          console:
+                              class: logging.StreamHandler
+                                  level: DEBUG
+                                      formatter: standard
+                                          stream: ext://sys.stdout
+                                            file:
+                                                class: logging.handlers.RotatingFileHandler
+                                                    level: INFO
+                                                        formatter: json
+                                                            filename: logs/hybrid_rag.log
+                                                                maxBytes: 10485760
+                                                                    backupCount: 5
+                                                                        encoding: utf-8
+                                                                          error_file:
+                                                                              class: logging.handlers.RotatingFileHandler
+                                                                                  level: ERROR
+                                                                                      formatter: json
+                                                                                          filename: logs/hybrid_rag_errors.log
+                                                                                              maxBytes: 10485760
+                                                                                                  backupCount: 3
+                                                                                                      encoding: utf-8
+                                                                                                      
+                                                                                                      loggers:
+                                                                                                        hybrid_rag:
+                                                                                                            level: DEBUG
+                                                                                                                handlers: [console, file, error_file]
+                                                                                                                    propagate: false
+                                                                                                                      hybrid_rag.retrieval:
+                                                                                                                          level: DEBUG
+                                                                                                                              handlers: [console, file]
+                                                                                                                                  propagate: false
+                                                                                                                                    hybrid_rag.ingestion:
+                                                                                                                                        level: INFO
+                                                                                                                                            handlers: [console, file]
+                                                                                                                                                propagate: false
+                                                                                                                                                  hybrid_rag.api:
+                                                                                                                                                      level: INFO
+                                                                                                                                                          handlers: [console, file, error_file]
+                                                                                                                                                              propagate: false
+                                                                                                                                                                uvicorn:
+                                                                                                                                                                    level: INFO
+                                                                                                                                                                        handlers: [console]
+                                                                                                                                                                            propagate: false
+                                                                                                                                                                            
+                                                                                                                                                                            root:
+                                                                                                                                                                              level: WARNING
+                                                                                                                                                                                handlers: [console]
+                                                                                                                                                                                
