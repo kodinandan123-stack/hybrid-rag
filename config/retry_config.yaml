@@ -1,0 +1,33 @@
+# config/retry_config.yaml
+#
+# Exponential back-off and retry settings for external service calls.
+# These values are loaded by retrieval/hybrid.py and generation/generator.py.
+
+defaults:
+  max_attempts: 3
+  initial_delay_seconds: 1.0
+  backoff_multiplier: 2.0
+  max_delay_seconds: 30.0
+  jitter: true
+
+services:
+  openai:
+    max_attempts: 5
+    initial_delay_seconds: 0.5
+    backoff_multiplier: 2.0
+    max_delay_seconds: 60.0
+    retryable_status_codes: [429, 500, 502, 503, 504]
+
+  pinecone:
+    max_attempts: 4
+    initial_delay_seconds: 1.0
+    backoff_multiplier: 1.5
+    max_delay_seconds: 20.0
+    retryable_status_codes: [429, 503]
+
+  embedding_api:
+    max_attempts: 3
+    initial_delay_seconds: 2.0
+    backoff_multiplier: 2.0
+    max_delay_seconds: 30.0
+    retryable_status_codes: [429, 500, 503]
