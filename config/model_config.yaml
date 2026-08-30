@@ -1,0 +1,52 @@
+# model_config.yaml
+# Configuration for embedding and generation models used in the hybrid-rag pipeline.
+
+embedding:
+  # Sentence-transformer model for dense vector encoding.
+  # Swap for a larger model to improve recall at the cost of speed.
+  model_name: "sentence-transformers/all-MiniLM-L6-v2"
+  # Dimensionality of the output embedding vectors.
+  # Must match the Qdrant collection vector size.
+  embedding_dim: 384
+  # Number of documents encoded per forward pass.
+  # Reduce if you encounter out-of-memory errors during ingestion.
+  batch_size: 32
+  # Device for embedding inference: "cpu" or "cuda".
+  # Set to "cuda" to use a GPU when available.
+  device: "cpu"
+  # Normalise embeddings to unit length before indexing.
+  # Required for cosine similarity scoring in Qdrant.
+  normalize: true
+
+reranker:
+  # Cross-encoder model for result reranking after RRF fusion.
+  model_name: "cross-encoder/ms-marco-MiniLM-L-6-v2"
+  # Number of fused candidates passed to the cross-encoder.
+  # Larger values improve recall but increase reranking latency.
+  rerank_top_k: 20
+  # Number of reranked results returned to the generation step.
+  top_k: 5
+  # Device for cross-encoder inference: "cpu" or "cuda".
+  device: "cpu"
+
+generation:
+  # Anthropic model used for answer synthesis.
+  # See https://docs.anthropic.com/en/docs/about-claude/models for options.
+  model_name: "claude-3-5-haiku-20241022"
+  # Maximum tokens in the generated answer.
+  max_tokens: 1024
+  # Sampling temperature: 0.0 for deterministic, up to 1.0 for more variety.
+  temperature: 0.2
+  # System prompt prefix injected before the retrieved context.
+  system_prompt: >
+    You are a precise and factual assistant. Answer the question using only
+    the provided context. If the answer is not contained in the context,
+    say "I don't know" rather than guessing.
+
+bm25:
+  # BM25 term-weighting parameters.
+  # k1 controls term-frequency saturation; b controls document-length normalisation.
+  k1: 1.5
+  b: 0.75
+  # Path to the serialised BM25 index produced by ingestion.
+  index_path: "data/bm25_index.pkl"
