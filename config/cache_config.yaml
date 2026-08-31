@@ -1,0 +1,24 @@
+# Cache configuration for the hybrid RAG retrieval pipeline
+
+cache:
+  backend: memory
+    max_size: 512
+      ttl_seconds: 3600
+        min_query_tokens: 3
+          normalize_queries: true
+
+          redis:
+            host: localhost
+              port: 6379
+                db: 0
+                  password: ""
+                    socket_timeout: 1.0
+                      key_prefix: "hybrid_rag:cache:"
+
+                      eviction:
+                        policy: lru
+                          evict_fraction: 0.1
+
+                          logging:
+                            log_hits: true
+                              log_misses: false
