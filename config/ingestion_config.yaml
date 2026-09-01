@@ -1,0 +1,57 @@
+# config/ingestion_config.yaml - ingestion pipeline configuration
+
+loader:
+  # Supported formats: pdf, markdown
+  supported_extensions:
+    - .pdf
+    - .md
+  # Recursively search subdirectories
+  recursive: true
+  # Skip files larger than this size (bytes)
+  max_file_size_bytes: 52428800  # 50 MB
+  # Metadata fields to extract from filename
+  extract_metadata: true
+
+chunker:
+  # Target chunk size in characters
+  chunk_size: 500
+  # Overlap between consecutive chunks
+  chunk_overlap: 50
+  # Splitter strategy: recursive_character | sentence | token
+  strategy: recursive_character
+  # Separators used by recursive character splitter (in priority order)
+  separators:
+    - "\n\n"
+    - "\n"
+    - ". "
+    - " "
+    - ""
+  # Minimum chunk length to index (shorter chunks are discarded)
+  min_chunk_length: 20
+
+vector_store:
+  # Qdrant collection name for dense embeddings
+  collection_name: hybrid_rag
+  # Embedding model (sentence-transformers)
+  embedding_model: all-MiniLM-L6-v2
+  # Embedding vector dimension (must match the model)
+  vector_size: 384
+  # Distance metric: Cosine | Dot | Euclid
+  distance: Cosine
+  # Batch size for upsert operations
+  upsert_batch_size: 128
+
+sparse_index:
+  # BM25 hyperparameters
+  k1: 1.5
+  b: 0.75
+  # Persist BM25 index to disk
+  persist_path: data/bm25_index.pkl
+
+pipeline:
+  # Number of worker threads for parallel ingestion
+  num_workers: 4
+  # Log progress every N documents
+  log_interval: 10
+  # Overwrite existing embeddings if document is re-ingested
+  overwrite_existing: false
