@@ -1,0 +1,18 @@
+# rerank_cache_config.yaml
+# Configuration for the cross-encoder reranker result cache.
+
+rerank_cache:
+  # Maximum number of (query, doc_ids) entries to hold in memory.
+  max_size: 512
+
+  # Seconds before a cached result is considered stale and evicted.
+  ttl_seconds: 300
+
+  # Whether to enable the cache at all.
+  enabled: true
+
+  # Hash algorithm used to build cache keys.
+  hash_algorithm: sha256
+
+  # Log a warning when the cache is more than this fraction full.
+  high_watermark_fraction: 0.9
