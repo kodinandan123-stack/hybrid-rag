@@ -1,0 +1,30 @@
+# config/query_expansion_config.yaml
+# Configuration for the QueryExpander component.
+
+query_expansion:
+  # Enable synonym-based expansion using WordNet
+  enable_synonyms: true
+
+  # Enable hyponym-based expansion (more specific terms) — can be noisy
+  enable_hyponyms: false
+
+  # Enable LLM-based query expansion via OpenAI chat completions
+  enable_llm_expansion: true
+
+  # Maximum number of expanded query variants to keep (excluding the original)
+  max_expansions: 5
+
+  # Temperature for the LLM expansion call (lower = more deterministic)
+  llm_temperature: 0.3
+
+  # Remove duplicate expansions before capping at max_expansions
+  deduplicate: true
+
+  # LLM model to use for expansion
+  llm_model: "gpt-4o-mini"
+
+  # Maximum tokens for the LLM expansion response
+  llm_max_tokens: 256
+
+  # Logging level for the query expander module
+  log_level: "INFO"
