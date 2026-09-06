@@ -1,0 +1,26 @@
+# context_config.yaml
+# Configuration for ContextCompressor — controls how retrieved chunks are
+# trimmed to fit the LLM context window before generation.
+
+context_compressor:
+  # Hard upper bound on tokens passed to the generation step.
+  # Increase if your model supports a larger context window.
+  max_tokens: 2048
+
+  # Rough approximation: tokens = len(text) * tokens_per_char.
+  # 0.25 assumes ~4 characters per token (typical for English).
+  # Use a lower value (e.g. 0.30) for code-heavy documents.
+  tokens_per_char: 0.25
+
+  # Chunk selection strategy:
+  #   greedy - include ranked chunks in order until budget is exhausted;
+  #            the last chunk may be truncated to fill remaining budget.
+  #   equal  - split budget equally across all chunks and truncate each.
+  strategy: greedy
+
+  # Minimum remaining characters before a partial chunk is included
+  # in greedy mode. Chunks smaller than this threshold are skipped.
+  min_partial_chars: 50
+
+  # Log level for compressor events (DEBUG | INFO | WARNING).
+  log_level: INFO
