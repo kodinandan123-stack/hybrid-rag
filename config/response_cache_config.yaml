@@ -1,0 +1,15 @@
+# response_cache_config.yaml
+# Settings for generation.response_cache.ResponseCache
+
+response_cache:
+  # Maximum number of responses stored in memory.
+    # Oldest (least-recently-used) entries are evicted when the limit is reached.
+      max_size: 256
+
+        # Time-to-live for each cached response, in seconds.
+          # Set to 0 to disable expiry (entries live until evicted by LRU pressure).
+            ttl: 3600
+
+              # Whether to enable the response cache at all.
+                # Set to false to bypass caching entirely (useful during development or evaluation).
+                  enabled: true
