@@ -10,17 +10,22 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 from datasets import Dataset
 from ragas import evaluate
-from ragas.metrics import answer_relevancy, context_precision, context_recall, faithfulness
+from ragas.metrics import (
+    answer_relevancy,
+    context_precision,
+    context_recall,
+    faithfulness,
+)
 
 from generation.generator import Generator
 from retrieval.hybrid import HybridRetriever
 
 
-def load_testset(path: str) -> List[Dict[str, Any]]:
+def load_testset(path: str) -> list[dict[str, Any]]:
     """Load a JSONL test set of {"question": ..., "ground_truth": ...} records."""
     records = []
     with Path(path).open(encoding="utf-8") as f:
@@ -32,7 +37,10 @@ def load_testset(path: str) -> List[Dict[str, Any]]:
 
 
 def run_pipeline(
-    testset: List[Dict[str, Any]], retriever: HybridRetriever, generator: Generator, top_k: int = 5
+    testset: list[dict[str, Any]],
+    retriever: HybridRetriever,
+    generator: Generator,
+    top_k: int = 5,
 ) -> Dataset:
     """Run each test question through retrieval + generation, collecting a ragas-ready dataset."""
     questions, answers, contexts, ground_truths = [], [], [], []
@@ -58,7 +66,7 @@ def run_pipeline(
 
 def evaluate_pipeline(
     testset_path: str, retriever: HybridRetriever, generator: Generator, top_k: int = 5
-) -> Dict[str, float]:
+) -> dict[str, float]:
     """Evaluate the pipeline on a test set and return ragas metric scores."""
     testset = load_testset(testset_path)
     dataset = run_pipeline(testset, retriever, generator, top_k=top_k)

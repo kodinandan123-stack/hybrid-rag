@@ -1,8 +1,7 @@
 """Retrieval evaluation metrics: precision, recall, F1, MRR, and NDCG."""
-from typing import List, Set
 
 
-def precision_at_k(retrieved: List[str], relevant: Set[str], k: int) -> float:
+def precision_at_k(retrieved: list[str], relevant: set[str], k: int) -> float:
     """Fraction of top-k retrieved docs that are relevant."""
     if k <= 0:
         return 0.0
@@ -11,7 +10,7 @@ def precision_at_k(retrieved: List[str], relevant: Set[str], k: int) -> float:
     return hits / k
 
 
-def recall_at_k(retrieved: List[str], relevant: Set[str], k: int) -> float:
+def recall_at_k(retrieved: list[str], relevant: set[str], k: int) -> float:
     """Fraction of relevant docs found in top-k results."""
     if not relevant:
         return 0.0
@@ -20,7 +19,7 @@ def recall_at_k(retrieved: List[str], relevant: Set[str], k: int) -> float:
     return hits / len(relevant)
 
 
-def f1_at_k(retrieved: List[str], relevant: Set[str], k: int) -> float:
+def f1_at_k(retrieved: list[str], relevant: set[str], k: int) -> float:
     """Harmonic mean of precision and recall at k."""
     p = precision_at_k(retrieved, relevant, k)
     r = recall_at_k(retrieved, relevant, k)
@@ -29,7 +28,7 @@ def f1_at_k(retrieved: List[str], relevant: Set[str], k: int) -> float:
     return 2 * p * r / (p + r)
 
 
-def reciprocal_rank(retrieved: List[str], relevant: Set[str]) -> float:
+def reciprocal_rank(retrieved: list[str], relevant: set[str]) -> float:
     """Reciprocal rank of the first relevant document."""
     for rank, doc in enumerate(retrieved, start=1):
         if doc in relevant:
@@ -37,7 +36,9 @@ def reciprocal_rank(retrieved: List[str], relevant: Set[str]) -> float:
     return 0.0
 
 
-def mean_reciprocal_rank(results: List[List[str]], relevant_sets: List[Set[str]]) -> float:
+def mean_reciprocal_rank(
+    results: list[list[str]], relevant_sets: list[set[str]]
+) -> float:
     """MRR averaged over multiple queries."""
     if not results:
         return 0.0
@@ -48,9 +49,10 @@ def mean_reciprocal_rank(results: List[List[str]], relevant_sets: List[Set[str]]
     return sum(rr_scores) / len(rr_scores)
 
 
-def dcg_at_k(retrieved: List[str], relevant: Set[str], k: int) -> float:
+def dcg_at_k(retrieved: list[str], relevant: set[str], k: int) -> float:
     """Discounted Cumulative Gain at k."""
     import math
+
     score = 0.0
     for i, doc in enumerate(retrieved[:k], start=1):
         if doc in relevant:
@@ -58,7 +60,7 @@ def dcg_at_k(retrieved: List[str], relevant: Set[str], k: int) -> float:
     return score
 
 
-def ndcg_at_k(retrieved: List[str], relevant: Set[str], k: int) -> float:
+def ndcg_at_k(retrieved: list[str], relevant: set[str], k: int) -> float:
     """Normalised DCG at k."""
     ideal = dcg_at_k(list(relevant), relevant, k)
     if ideal == 0:
