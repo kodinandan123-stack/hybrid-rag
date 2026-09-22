@@ -1,20 +1,20 @@
 """FastAPI application exposing a /query endpoint for the hybrid RAG pipeline."""
 
-from typing import List, Dict, Any, Optional
+from typing import Any
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
-from retrieval.dense import DenseRetriever
-from retrieval.sparse import SparseRetriever
-from retrieval.hybrid import HybridRetriever
 from generation.generator import Generator
+from retrieval.dense import DenseRetriever
+from retrieval.hybrid import HybridRetriever
+from retrieval.sparse import SparseRetriever
 
 app = FastAPI(title="Hybrid RAG API")
 
 _dense = DenseRetriever()
-_sparse: Optional[SparseRetriever] = None
-_hybrid: Optional[HybridRetriever] = None
+_sparse: SparseRetriever | None = None
+_hybrid: HybridRetriever | None = None
 _generator = Generator()
 
 
@@ -25,7 +25,7 @@ class QueryRequest(BaseModel):
 
 class QueryResponse(BaseModel):
     answer: str
-    sources: List[Dict[str, Any]]
+    sources: list[dict[str, Any]]
 
 
 def _get_hybrid_retriever() -> HybridRetriever:
@@ -38,7 +38,7 @@ def _get_hybrid_retriever() -> HybridRetriever:
 
 
 @app.post("/index")
-def index_chunks(chunks: List[Dict[str, Any]]) -> Dict[str, int]:
+def index_chunks(chunks: list[dict[str, Any]]) -> dict[str, int]:
     """Index a batch of chunk dicts into both the dense and sparse retrievers."""
     if not chunks:
         raise HTTPException(status_code=400, detail="chunks must not be empty")
@@ -59,6 +59,6 @@ def query(request: QueryRequest) -> QueryResponse:
 
 
 @app.get("/health")
-def health() -> Dict[str, str]:
+def health() -> dict[str, str]:
     """Simple liveness probe."""
     return {"status": "ok"}
