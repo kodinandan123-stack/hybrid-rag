@@ -1,15 +1,21 @@
 """Dense retrieval using sentence-transformers embeddings and Qdrant vector search."""
 
-from typing import List, Dict, Any
-from sentence_transformers import SentenceTransformer
+from typing import Any
+
 from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, VectorParams, PointStruct
+from qdrant_client.models import Distance, PointStruct, VectorParams
+from sentence_transformers import SentenceTransformer
 
 
 class DenseRetriever:
     """Embeds chunks with sentence-transformers and indexes them in Qdrant."""
 
-    def __init__(self, collection_name: str = "hybrid_rag_chunks", model_name: str = "all-MiniLM-L6-v2", url: str = "http://localhost:6333"):
+    def __init__(
+        self,
+        collection_name: str = "hybrid_rag_chunks",
+        model_name: str = "all-MiniLM-L6-v2",
+        url: str = "http://localhost:6333",
+    ):
         self.model = SentenceTransformer(model_name)
         self.client = QdrantClient(url=url)
         self.collection_name = collection_name
@@ -22,7 +28,7 @@ class DenseRetriever:
                 vectors_config=VectorParams(size=vector_size, distance=Distance.COSINE),
             )
 
-    def index(self, chunks: List[Dict[str, Any]]) -> None:
+    def index(self, chunks: list[dict[str, Any]]) -> None:
         texts = [chunk["text"] for chunk in chunks]
         embeddings = self.model.encode(texts, show_progress_bar=False)
         self._ensure_collection(vector_size=embeddings.shape[1])
@@ -32,7 +38,7 @@ class DenseRetriever:
         ]
         self.client.upsert(collection_name=self.collection_name, points=points)
 
-    def search(self, query: str, top_k: int = 5) -> List[Dict[str, Any]]:
+    def search(self, query: str, top_k: int = 5) -> list[dict[str, Any]]:
         query_vector = self.model.encode(query).tolist()
         results = self.client.search(
             collection_name=self.collection_name,

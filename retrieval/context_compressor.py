@@ -8,14 +8,13 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from typing import List
 
 logger = logging.getLogger(__name__)
 
 
 @dataclass
 class CompressedContext:
-    chunks: List[str]
+    chunks: list[str]
     total_tokens: int
     dropped: int
 
@@ -41,7 +40,7 @@ class ContextCompressor:
         self.tokens_per_char = tokens_per_char
         self.strategy = strategy
 
-    def compress(self, chunks: List[str]) -> CompressedContext:
+    def compress(self, chunks: list[str]) -> CompressedContext:
         if self.strategy == "greedy":
             return self._greedy(chunks)
         return self._equal(chunks)
@@ -49,7 +48,7 @@ class ContextCompressor:
     def _estimate_tokens(self, text: str) -> int:
         return max(1, round(len(text) * self.tokens_per_char))
 
-    def _greedy(self, chunks: List[str]) -> CompressedContext:
+    def _greedy(self, chunks: list[str]) -> CompressedContext:
         selected = []
         budget = self.max_tokens
         dropped = 0
@@ -69,11 +68,18 @@ class ContextCompressor:
                     dropped += len(chunks) - len(selected) - dropped
                     break
         total_used = self.max_tokens - budget
-        logger.info("Compression: %d/%d chunks kept, ~%d tokens, %d dropped.",
-                    len(selected), len(chunks), total_used, dropped)
-        return CompressedContext(chunks=selected, total_tokens=total_used, dropped=dropped)
+        logger.info(
+            "Compression: %d/%d chunks kept, ~%d tokens, %d dropped.",
+            len(selected),
+            len(chunks),
+            total_used,
+            dropped,
+        )
+        return CompressedContext(
+            chunks=selected, total_tokens=total_used, dropped=dropped
+        )
 
-    def _equal(self, chunks: List[str]) -> CompressedContext:
+    def _equal(self, chunks: list[str]) -> CompressedContext:
         if not chunks:
             return CompressedContext(chunks=[], total_tokens=0, dropped=0)
         per_chunk = self.max_tokens // len(chunks)

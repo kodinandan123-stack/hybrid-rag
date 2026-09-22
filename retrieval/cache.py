@@ -8,7 +8,7 @@ redundant vector and BM25 lookups during interactive or batch sessions.
 
 from __future__ import annotations
 
-from typing import Any, Dict, List
+from typing import Any
 
 
 class RetrievalCache:
@@ -17,10 +17,10 @@ class RetrievalCache:
     def __init__(self, retriever: Any, maxsize: int = 128) -> None:
         self._retriever = retriever
         self._maxsize = maxsize
-        self._cache: Dict[tuple, List[Dict[str, Any]]] = {}
-        self._order: List[tuple] = []
+        self._cache: dict[tuple, list[dict[str, Any]]] = {}
+        self._order: list[tuple] = []
 
-    def search(self, query: str, top_k: int = 5) -> List[Dict[str, Any]]:
+    def search(self, query: str, top_k: int = 5) -> list[dict[str, Any]]:
         """Return cached hits if available, otherwise delegate to the retriever."""
         key = (query.strip().lower(), top_k)
         if key in self._cache:

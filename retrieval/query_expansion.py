@@ -4,7 +4,11 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from typing import List, Optional
+
+try:
+    import openai
+except ImportError:  # openai is an optional dependency; LLM-based expansion
+    openai = None  # is simply skipped (see _llm_expansions) when it's absent.
 
 logger = logging.getLogger(__name__)
 
@@ -22,10 +26,10 @@ class QueryExpansionConfig:
 @dataclass
 class ExpandedQuery:
     original: str
-    expansions: List[str] = field(default_factory=list)
+    expansions: list[str] = field(default_factory=list)
 
     @property
-    def all_queries(self) -> List[str]:
+    def all_queries(self) -> list[str]:
         seen = {self.original}
         result = [self.original]
         for q in self.expansions:
@@ -53,10 +57,11 @@ class QueryExpander:
         logger.debug("Expanded %r -> %d variants", query, len(result.expansions))
         return result
 
-    def _synonym_expansions(self, query: str) -> List[str]:
+    def _synonym_expansions(self, query: str) -> list[str]:
         try:
             import nltk
             from nltk.corpus import wordnet
+
             nltk.download("wordnet", quiet=True)
             tokens = query.split()
             variants = []
@@ -65,17 +70,18 @@ class QueryExpander:
                     for lemma in syn.lemmas():
                         candidate = lemma.name().replace("_", " ")
                         if candidate.lower() != token.lower():
-                            new_tokens = tokens[:i] + [candidate] + tokens[i + 1:]
+                            new_tokens = tokens[:i] + [candidate] + tokens[i + 1 :]
                             variants.append(" ".join(new_tokens))
             return variants
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.warning("Synonym expansion failed: %s", exc)
             return []
 
-    def _hyponym_expansions(self, query: str) -> List[str]:
+    def _hyponym_expansions(self, query: str) -> list[str]:
         try:
             import nltk
             from nltk.corpus import wordnet
+
             nltk.download("wordnet", quiet=True)
             tokens = query.split()
             variants = []
@@ -84,16 +90,18 @@ class QueryExpander:
                     for hypo in syn.hyponyms():
                         for lemma in hypo.lemmas():
                             candidate = lemma.name().replace("_", " ")
-                            new_tokens = tokens[:i] + [candidate] + tokens[i + 1:]
+                            new_tokens = tokens[:i] + [candidate] + tokens[i + 1 :]
                             variants.append(" ".join(new_tokens))
             return variants
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.warning("Hyponym expansion failed: %s", exc)
             return []
 
-    def _llm_expansions(self, query: str) -> List[str]:
+    def _llm_expansions(self, query: str) -> list[str]:
         try:
-            import openai
+            if openai is None:
+                raise ImportError("openai package is not installed")
+
             prompt = (
                 f"Generate {self.config.max_expansions} alternative search queries "
                 f"for the following question. Return one per line, no numbering.\n\nQuestion: {query}"
@@ -106,6 +114,6 @@ class QueryExpander:
             )
             raw = response.choices[0].message.content or ""
             return [line.strip() for line in raw.splitlines() if line.strip()]
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.warning("LLM expansion failed: %s", exc)
             return []
