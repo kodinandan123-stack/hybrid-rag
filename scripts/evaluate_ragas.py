@@ -23,17 +23,16 @@ from __future__ import annotations
 import argparse
 import json
 import logging
-import sys
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 from config.logging import configure_logging
-from ingestion.loader import Loader
-from ingestion.chunker import Chunker
-from retrieval.dense import DenseRetriever
-from retrieval.sparse import SparseRetriever
-from retrieval.hybrid import HybridRetriever
 from generation.generator import Generator
+from ingestion.chunker import Chunker
+from ingestion.loader import Loader
+from retrieval.dense import DenseRetriever
+from retrieval.hybrid import HybridRetriever
+from retrieval.sparse import SparseRetriever
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +40,7 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # Pipeline bootstrap
 # ---------------------------------------------------------------------------
+
 
 def _build_pipeline(corpus_dir: str, top_k: int):
     """Index *corpus_dir* and return a ready (retriever, generator) pair."""
@@ -66,27 +66,30 @@ def _build_pipeline(corpus_dir: str, top_k: int):
 # RAGAS dataset construction
 # ---------------------------------------------------------------------------
 
+
 def _build_ragas_dataset(
     testset_path: str,
     hybrid: HybridRetriever,
     generator: Generator,
     top_k: int,
-) -> Dict[str, List[Any]]:
+) -> dict[str, list[Any]]:
     """
     For each QA pair in the testset, retrieve context, generate an answer,
     and collect the four columns RAGAS expects:
         question, answer, contexts, ground_truth
     """
-    questions: List[str] = []
-    answers: List[str] = []
-    contexts: List[List[str]] = []
-    ground_truths: List[str] = []
+    questions: list[str] = []
+    answers: list[str] = []
+    contexts: list[list[str]] = []
+    ground_truths: list[str] = []
 
     testset = Path(testset_path)
     if not testset.exists():
         raise FileNotFoundError(f"Testset not found: {testset_path}")
 
-    rows = [json.loads(line) for line in testset.read_text().splitlines() if line.strip()]
+    rows = [
+        json.loads(line) for line in testset.read_text().splitlines() if line.strip()
+    ]
     logger.info("Evaluating %d QA pairs from %s", len(rows), testset_path)
 
     for i, row in enumerate(rows, 1):
@@ -117,15 +120,16 @@ def _build_ragas_dataset(
 # Evaluation
 # ---------------------------------------------------------------------------
 
-def _run_ragas(dataset_dict: Dict[str, List[Any]]) -> Dict[str, float]:
+
+def _run_ragas(dataset_dict: dict[str, list[Any]]) -> dict[str, float]:
     """Evaluate with RAGAS and return a dict of metric_name -> score."""
     try:
         from datasets import Dataset  # type: ignore
         from ragas import evaluate  # type: ignore
         from ragas.metrics import (  # type: ignore
-            faithfulness,
             answer_relevancy,
             context_recall,
+            faithfulness,
         )
     except ImportError as exc:
         logger.error(
@@ -137,7 +141,7 @@ def _run_ragas(dataset_dict: Dict[str, List[Any]]) -> Dict[str, float]:
     ds = Dataset.from_dict(dataset_dict)
     result = evaluate(ds, metrics=[faithfulness, answer_relevancy, context_recall])
 
-    scores: Dict[str, float] = {}
+    scores: dict[str, float] = {}
     for metric in [faithfulness, answer_relevancy, context_recall]:
         key = metric.name
         scores[key] = float(result[key])
@@ -148,6 +152,7 @@ def _run_ragas(dataset_dict: Dict[str, List[Any]]) -> Dict[str, float]:
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
+
 
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(

@@ -11,14 +11,13 @@ from __future__ import annotations
 import argparse
 import statistics
 import time
-from typing import List
 
 import requests
 
 
-def benchmark(queries: List[str], api_url: str, top_k: int = 5) -> None:
+def benchmark(queries: list[str], api_url: str, top_k: int = 5) -> None:
     """Run each query against the /query endpoint and print latency stats."""
-    latencies: List[float] = []
+    latencies: list[float] = []
     errors = 0
 
     for i, query in enumerate(queries, 1):
@@ -30,7 +29,7 @@ def benchmark(queries: List[str], api_url: str, top_k: int = 5) -> None:
                 timeout=30,
             )
             resp.raise_for_status()
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             print(f"  [{i}/{len(queries)}] ERROR: {exc}")
             errors += 1
             continue
@@ -53,13 +52,23 @@ def benchmark(queries: List[str], api_url: str, top_k: int = 5) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Benchmark the hybrid RAG /query endpoint.")
-    parser.add_argument("--api-url", default="http://localhost:8000", help="Base URL of the running API")
-    parser.add_argument("--top-k", type=int, default=5, help="Number of chunks to retrieve per query")
+    parser = argparse.ArgumentParser(
+        description="Benchmark the hybrid RAG /query endpoint."
+    )
+    parser.add_argument(
+        "--api-url", default="http://localhost:8000", help="Base URL of the running API"
+    )
+    parser.add_argument(
+        "--top-k", type=int, default=5, help="Number of chunks to retrieve per query"
+    )
     parser.add_argument(
         "queries",
         nargs="*",
-        default=["What is RAG?", "How does hybrid retrieval work?", "Explain reciprocal rank fusion."],
+        default=[
+            "What is RAG?",
+            "How does hybrid retrieval work?",
+            "Explain reciprocal rank fusion.",
+        ],
         help="One or more query strings to benchmark",
     )
     args = parser.parse_args()

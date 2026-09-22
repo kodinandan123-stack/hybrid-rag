@@ -1,11 +1,11 @@
 """Profile retrieval latency and throughput for dense, sparse, and hybrid retrievers."""
-import time
-import statistics
+
 import argparse
-from typing import List, Dict
+import statistics
+import time
 
 
-def profile_retriever(retriever, queries: List[str], top_k: int = 10) -> Dict:
+def profile_retriever(retriever, queries: list[str], top_k: int = 10) -> dict:
     """Run queries through retriever and collect latency stats."""
     latencies = []
     for query in queries:
@@ -26,7 +26,7 @@ def profile_retriever(retriever, queries: List[str], top_k: int = 10) -> Dict:
     }
 
 
-def print_report(name: str, stats: Dict) -> None:
+def print_report(name: str, stats: dict) -> None:
     """Print a formatted profiling report."""
     print(f"\n=== {name} ===")
     print(f"  Queries run : {stats['count']}")
@@ -38,7 +38,7 @@ def print_report(name: str, stats: Dict) -> None:
     print(f"  Throughput  : {stats['throughput_qps']:.1f} QPS")
 
 
-def load_queries(path: str) -> List[str]:
+def load_queries(path: str) -> list[str]:
     """Load queries from a plain-text file, one per line."""
     with open(path) as f:
         return [line.strip() for line in f if line.strip()]
@@ -48,7 +48,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Profile retrieval latency")
     parser.add_argument("--queries", required=True, help="Path to queries file")
     parser.add_argument("--top-k", type=int, default=10)
-    parser.add_argument("--retriever", choices=["dense", "sparse", "hybrid"], default="hybrid")
+    parser.add_argument(
+        "--retriever", choices=["dense", "sparse", "hybrid"], default="hybrid"
+    )
     args = parser.parse_args()
 
     queries = load_queries(args.queries)
@@ -56,12 +58,15 @@ def main() -> None:
 
     if args.retriever == "dense":
         from retrieval.dense import DenseRetriever
+
         retriever = DenseRetriever()
     elif args.retriever == "sparse":
         from retrieval.sparse import SparseRetriever
+
         retriever = SparseRetriever()
     else:
         from retrieval.hybrid import HybridRetriever
+
         retriever = HybridRetriever()
 
     stats = profile_retriever(retriever, queries, top_k=args.top_k)

@@ -11,8 +11,8 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from config.logging import setup_logging  # noqa: E402
-from retrieval.cache import RetrievalCache  # noqa: E402
+from config.logging import setup_logging
+from retrieval.cache import RetrievalCache
 
 logger = logging.getLogger(__name__)
 
@@ -25,11 +25,15 @@ def clean_cache() -> None:
 
 
 def clean_stale_exports(export_dir: Path, keep: int = 5) -> None:
-    files = sorted(export_dir.glob("*.jsonl"), key=lambda f: f.stat().st_mtime, reverse=True)
+    files = sorted(
+        export_dir.glob("*.jsonl"), key=lambda f: f.stat().st_mtime, reverse=True
+    )
     for f in files[keep:]:
         f.unlink()
         logger.info("Deleted: %s", f.name)
-    logger.info("Kept %d, deleted %d.", min(len(files), keep), max(0, len(files) - keep))
+    logger.info(
+        "Kept %d, deleted %d.", min(len(files), keep), max(0, len(files) - keep)
+    )
 
 
 def parse_args() -> argparse.Namespace:

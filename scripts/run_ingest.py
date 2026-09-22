@@ -5,6 +5,7 @@ Usage:
     python scripts/run_ingest.py --corpus-dir data/corpus --reset
     python scripts/run_ingest.py --corpus-dir data/corpus --file report.pdf
 """
+
 import argparse
 import logging
 import sys
@@ -12,11 +13,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from ingestion.loader import DocumentLoader
+from config import settings
 from ingestion.chunker import RecursiveChunker
+from ingestion.loader import DocumentLoader
 from retrieval.dense import DenseRetriever
 from retrieval.sparse import SparseRetriever
-from config import settings
 
 logging.basicConfig(
     level=logging.INFO,
@@ -85,9 +86,7 @@ def main() -> None:
         source_files = list(args.corpus_dir.rglob("*.pdf")) + list(
             args.corpus_dir.rglob("*.md")
         )
-        logger.info(
-            "Found %d document(s) in %s", len(source_files), args.corpus_dir
-        )
+        logger.info("Found %d document(s) in %s", len(source_files), args.corpus_dir)
 
     if not source_files:
         logger.warning("No documents found. Exiting.")

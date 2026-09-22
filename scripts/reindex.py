@@ -34,14 +34,20 @@ def reindex(corpus_dir: str, api_url: str) -> int:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Reindex the corpus into the hybrid RAG API.")
-    parser.add_argument("corpus", nargs="?", default="corpus", help="Path to the corpus directory")
-    parser.add_argument("--api-url", default="http://localhost:8000", help="Base URL of the running API")
+    parser = argparse.ArgumentParser(
+        description="Reindex the corpus into the hybrid RAG API."
+    )
+    parser.add_argument(
+        "corpus", nargs="?", default="corpus", help="Path to the corpus directory"
+    )
+    parser.add_argument(
+        "--api-url", default="http://localhost:8000", help="Base URL of the running API"
+    )
     args = parser.parse_args()
 
     try:
         reindex(args.corpus, args.api_url)
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         print(f"Reindex failed: {exc}", file=sys.stderr)
         sys.exit(1)
 
