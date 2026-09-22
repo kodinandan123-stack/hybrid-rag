@@ -8,12 +8,9 @@ indexing in the hybrid RAG pipeline.
 
 from __future__ import annotations
 
-from typing import Dict, List
-
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from ingestion.loader import LoadedDocument
-
 
 CHUNK_SIZE = 500
 CHUNK_OVERLAP = 50
@@ -32,7 +29,7 @@ def get_splitter(
 
 def chunk_document(
     document: LoadedDocument, splitter: RecursiveCharacterTextSplitter = None
-) -> List[Dict]:
+) -> list[dict]:
     """
     Split a single LoadedDocument into chunk dicts.
 
@@ -49,7 +46,7 @@ def chunk_document(
     splitter = splitter or get_splitter()
     pieces = splitter.split_text(document.text)
 
-    chunks: List[Dict] = []
+    chunks: list[dict] = []
     for index, piece in enumerate(pieces):
         chunk_id = f"{document.source}::chunk-{index}"
         chunks.append(
@@ -62,10 +59,10 @@ def chunk_document(
     return chunks
 
 
-def chunk_documents(documents: List[LoadedDocument]) -> List[Dict]:
+def chunk_documents(documents: list[LoadedDocument]) -> list[dict]:
     """Split many LoadedDocuments into a single flat list of chunk dicts."""
     splitter = get_splitter()
-    all_chunks: List[Dict] = []
+    all_chunks: list[dict] = []
     for document in documents:
         all_chunks.extend(chunk_document(document, splitter))
     return all_chunks

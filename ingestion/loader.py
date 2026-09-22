@@ -10,9 +10,9 @@ cite exactly where an answer came from.
 from __future__ import annotations
 
 import logging
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Iterable, List, Union
 
 from pypdf import PdfReader
 
@@ -28,7 +28,7 @@ class LoadedDocument:
     text: str
     source: str
     file_type: str
-    pages: List[str] = field(default_factory=list)
+    pages: list[str] = field(default_factory=list)
 
 
 def _iter_corpus_files(corpus_dir: Path) -> Iterable[Path]:
@@ -62,7 +62,7 @@ def load_pdf(path: Path) -> LoadedDocument:
     )
 
 
-def load_corpus(corpus_dir: Union[str, Path]) -> List[LoadedDocument]:
+def load_corpus(corpus_dir: str | Path) -> list[LoadedDocument]:
     """
     Load all supported documents (PDF, Markdown) from a corpus directory.
 
@@ -77,7 +77,7 @@ def load_corpus(corpus_dir: Union[str, Path]) -> List[LoadedDocument]:
     if not corpus_path.exists():
         raise FileNotFoundError(f"Corpus directory not found: {corpus_path}")
 
-    documents: List[LoadedDocument] = []
+    documents: list[LoadedDocument] = []
     for file_path in _iter_corpus_files(corpus_path):
         try:
             if file_path.suffix.lower() == ".pdf":
@@ -85,7 +85,7 @@ def load_corpus(corpus_dir: Union[str, Path]) -> List[LoadedDocument]:
             else:
                 documents.append(load_markdown(file_path))
             logger.info("Loaded %s", file_path)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.warning("Failed to load %s: %s", file_path, exc)
 
     return documents
