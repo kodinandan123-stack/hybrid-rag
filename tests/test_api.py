@@ -5,9 +5,12 @@ from unittest.mock import MagicMock, patch
 
 os.environ.setdefault("ANTHROPIC_API_KEY", "test-key")
 
-with patch("retrieval.dense.SentenceTransformer"), patch("retrieval.dense.QdrantClient"):
-    from api.main import app
+with (
+    patch("retrieval.dense.SentenceTransformer"),
+    patch("retrieval.dense.QdrantClient"),
+):
     import api.main as main_module
+    from api.main import app
 
 from fastapi.testclient import TestClient
 
@@ -52,7 +55,9 @@ def test_query_returns_answer_and_sources():
     mock_hybrid.search.return_value = [{"text": "alpha", "source": "doc.md"}]
     main_module._hybrid = mock_hybrid
 
-    with patch.object(main_module._generator, "generate", return_value="alpha is a chunk"):
+    with patch.object(
+        main_module._generator, "generate", return_value="alpha is a chunk"
+    ):
         response = client.post("/query", json={"query": "what is alpha?"})
 
     assert response.status_code == 200

@@ -1,5 +1,5 @@
 """tests/test_cache.py - unit tests for RetrievalCache."""
-import pytest
+
 from retrieval.cache import RetrievalCache
 
 

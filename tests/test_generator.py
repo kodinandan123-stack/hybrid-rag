@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
-from typing import Any, Dict, List
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-from generation.generator import Generator, SYSTEM_PROMPT
+from generation.generator import SYSTEM_PROMPT, Generator
 
 
-def _chunk(text: str, source: str = "doc.md", chunk_id: str = "c1") -> Dict[str, Any]:
+def _chunk(text: str, source: str = "doc.md", chunk_id: str = "c1") -> dict[str, Any]:
     return {"text": text, "source": source, "chunk_id": chunk_id}
 
 
@@ -56,9 +56,12 @@ class TestGeneratorFormatContext:
 
 
 class TestGeneratorGenerate:
-    def test_generate_calls_anthropic_with_correct_model(self, mock_anthropic, monkeypatch):
+    def test_generate_calls_anthropic_with_correct_model(
+        self, mock_anthropic, monkeypatch
+    ):
         monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
         from config.settings import get_settings
+
         get_settings.cache_clear()
 
         gen = Generator(model="claude-test-model", api_key="test-key")
@@ -72,10 +75,13 @@ class TestGeneratorGenerate:
     def test_generate_includes_query_in_user_message(self, mock_anthropic, monkeypatch):
         monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
         from config.settings import get_settings
+
         get_settings.cache_clear()
 
         gen = Generator(model="claude-test-model", api_key="test-key")
-        gen.generate("Explain dense retrieval", [_chunk("Dense retrieval uses embeddings.")])
+        gen.generate(
+            "Explain dense retrieval", [_chunk("Dense retrieval uses embeddings.")]
+        )
 
         call_kwargs = mock_anthropic.messages.create.call_args[1]
         user_content = call_kwargs["messages"][0]["content"]
@@ -84,6 +90,7 @@ class TestGeneratorGenerate:
     def test_generate_includes_chunk_text_in_context(self, mock_anthropic, monkeypatch):
         monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
         from config.settings import get_settings
+
         get_settings.cache_clear()
 
         gen = Generator(model="claude-test-model", api_key="test-key")
@@ -97,6 +104,7 @@ class TestGeneratorGenerate:
     def test_generate_respects_max_tokens(self, mock_anthropic, monkeypatch):
         monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
         from config.settings import get_settings
+
         get_settings.cache_clear()
 
         gen = Generator(model="claude-test-model", api_key="test-key")

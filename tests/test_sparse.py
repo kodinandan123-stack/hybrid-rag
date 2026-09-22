@@ -4,10 +4,10 @@ import pytest
 
 from retrieval.sparse import SparseRetriever, _tokenize
 
-
 # ---------------------------------------------------------------------------
 # _tokenize
 # ---------------------------------------------------------------------------
+
 
 def test_tokenize_lowercases_and_splits():
     tokens = _tokenize("Hello World")
@@ -58,6 +58,7 @@ def test_constructor_with_chunks_indexes_immediately():
 # ---------------------------------------------------------------------------
 # SparseRetriever.search
 # ---------------------------------------------------------------------------
+
 
 def test_search_returns_list_of_dicts():
     sr = SparseRetriever(chunks=CHUNKS)

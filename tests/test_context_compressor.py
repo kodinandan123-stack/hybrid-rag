@@ -4,6 +4,7 @@ Unit tests for retrieval.context_compressor.ContextCompressor.
 """
 
 import pytest
+
 from retrieval.context_compressor import CompressedContext, ContextCompressor
 
 

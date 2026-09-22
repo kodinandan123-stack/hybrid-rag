@@ -1,55 +1,74 @@
 """tests/test_ingestion.py
 
-Unit tests for the PDF loader and recursive text chunker.
+Integration-style tests spanning the PDF loader and the recursive text
+chunker together (loader.py and chunker.py are unit-tested individually in
+test_loader.py and test_chunker.py).
 """
 
-import pytest
-from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
-from ingestion.chunker import RecursiveChunker
-from ingestion.loader import PDFLoader
+from ingestion.chunker import chunk_document
+from ingestion.loader import LoadedDocument, load_corpus, load_pdf
 
 
 class TestPDFLoader:
-    def test_load_returns_list(self, tmp_path: Path) -> None:
+    def test_load_pdf_returns_loaded_document(self, tmp_path):
         fake_pdf = tmp_path / "sample.pdf"
         fake_pdf.write_bytes(b"%PDF-1.4 fake content")
-        loader = PDFLoader(str(fake_pdf))
-        with patch.object(loader, "_extract_text", return_value="Hello world."):
-            docs = loader.load()
-        assert isinstance(docs, list)
 
-    def test_load_empty_file_raises(self, tmp_path: Path) -> None:
-        empty = tmp_path / "empty.pdf"
-        empty.write_bytes(b"")
-        loader = PDFLoader(str(empty))
-        with pytest.raises(ValueError, match="empty"):
-            loader.load()
+        with patch("ingestion.loader.PdfReader") as mock_reader_cls:
+            mock_page = type(
+                "Page", (), {"extract_text": lambda self: "Hello world."}
+            )()
+            mock_reader_cls.return_value.pages = [mock_page]
+            doc = load_pdf(fake_pdf)
 
-    def test_metadata_contains_source(self, tmp_path: Path) -> None:
+        assert isinstance(doc, LoadedDocument)
+        assert doc.file_type == "pdf"
+        assert doc.source == str(fake_pdf)
+        assert "Hello world." in doc.text
+
+    def test_load_corpus_picks_up_pdf_alongside_markdown(self, tmp_path):
+        (tmp_path / "note.md").write_text("Markdown content.", encoding="utf-8")
+        pdf_path = tmp_path / "report.pdf"
+        pdf_path.write_bytes(b"%PDF-1.4 fake")
+
+        with patch("ingestion.loader.PdfReader") as mock_reader_cls:
+            mock_page = type(
+                "Page", (), {"extract_text": lambda self: "PDF content."}
+            )()
+            mock_reader_cls.return_value.pages = [mock_page]
+            docs = load_corpus(tmp_path)
+
+        file_types = {doc.file_type for doc in docs}
+        assert file_types == {"markdown", "pdf"}
+
+    def test_metadata_contains_source(self, tmp_path):
         fake_pdf = tmp_path / "report.pdf"
         fake_pdf.write_bytes(b"%PDF-1.4 fake")
-        loader = PDFLoader(str(fake_pdf))
-        with patch.object(loader, "_extract_text", return_value="Content."):
-            docs = loader.load()
-        for doc in docs:
-            assert "source" in doc.metadata
+
+        with patch("ingestion.loader.PdfReader") as mock_reader_cls:
+            mock_page = type("Page", (), {"extract_text": lambda self: "Content."})()
+            mock_reader_cls.return_value.pages = [mock_page]
+            doc = load_pdf(fake_pdf)
+
+        assert doc.source == str(fake_pdf)
 
 
-class TestRecursiveChunker:
-    def test_chunk_splits_long_text(self) -> None:
-        chunker = RecursiveChunker(chunk_size=50, chunk_overlap=10)
-        text = "word " * 100
-        chunks = chunker.split(text)
+class TestIngestionToChunking:
+    def test_loaded_document_can_be_chunked(self):
+        doc = LoadedDocument(
+            text="word " * 200,
+            source="doc.md",
+            file_type="markdown",
+            pages=["word " * 200],
+        )
+        chunks = chunk_document(doc)
         assert len(chunks) > 1
+        assert all(chunk["source"] == "doc.md" for chunk in chunks)
 
-    def test_chunk_respects_max_size(self) -> None:
-        chunker = RecursiveChunker(chunk_size=100, chunk_overlap=20)
-        text = "sentence. " * 50
-        for chunk in chunker.split(text):
-            assert len(chunk) <= 120  # allow slight overflow at boundaries
-
-    def test_chunk_empty_string(self) -> None:
-        chunker = RecursiveChunker(chunk_size=100, chunk_overlap=10)
-        assert chunker.split("") == []
+    def test_empty_document_yields_no_chunks(self):
+        doc = LoadedDocument(
+            text="", source="empty.md", file_type="markdown", pages=[""]
+        )
+        assert chunk_document(doc) == []

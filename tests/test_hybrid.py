@@ -2,14 +2,12 @@
 
 from unittest.mock import MagicMock
 
-import pytest
-
 from retrieval.hybrid import HybridRetriever
-
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _make_hits(ids):
     """Return a ranked list of chunk dicts keyed by chunk_id."""
@@ -26,6 +24,7 @@ def _mock_retriever(hits):
 # ---------------------------------------------------------------------------
 # HybridRetriever._rrf_scores
 # ---------------------------------------------------------------------------
+
 
 def test_rrf_scores_returns_dict():
     dense = _mock_retriever(_make_hits(["a", "b"]))
@@ -77,6 +76,7 @@ def test_rrf_scores_custom_rrf_k():
 # ---------------------------------------------------------------------------
 # HybridRetriever.search
 # ---------------------------------------------------------------------------
+
 
 def test_search_calls_both_retrievers():
     dense_hits = _make_hits(["d1", "d2"])

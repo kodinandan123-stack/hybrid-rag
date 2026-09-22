@@ -34,7 +34,10 @@ def test_chunk_document_ids_are_sequential_and_unique():
 
 
 def test_chunk_documents_flattens_multiple_sources():
-    docs = [_doc("first document text " * 50, source="a.md"), _doc("second document text " * 50, source="b.md")]
+    docs = [
+        _doc("first document text " * 50, source="a.md"),
+        _doc("second document text " * 50, source="b.md"),
+    ]
     chunks = chunk_documents(docs)
     sources = {chunk["source"] for chunk in chunks}
     assert sources == {"a.md", "b.md"}

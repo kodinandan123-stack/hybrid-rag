@@ -32,7 +32,9 @@ def test_hybrid_retriever_fuses_dense_and_sparse_results():
 
 
 def test_hybrid_retriever_respects_top_k():
-    dense = _FakeRetriever([_chunk("a", "alpha"), _chunk("b", "bravo"), _chunk("c", "charlie")])
+    dense = _FakeRetriever(
+        [_chunk("a", "alpha"), _chunk("b", "bravo"), _chunk("c", "charlie")]
+    )
     sparse = _FakeRetriever([])
     retriever = HybridRetriever(dense=dense, sparse=sparse)
 
