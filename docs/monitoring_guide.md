@@ -12,6 +12,7 @@ at `monitoring/grafana_dashboard.json`.
 
 ```python
 from monitoring.metrics import start_metrics_server
+
 start_metrics_server(port=8001)
 ```
 
@@ -35,6 +36,7 @@ Metrics are then available at `http://localhost:8001/metrics`.
 
 ```python
 from monitoring.metrics import QUERY_LATENCY, QUERY_COUNTER, MetricsTimer
+
 
 def handle_query(query: str) -> str:
     with MetricsTimer(QUERY_LATENCY):

@@ -19,7 +19,9 @@ All strategies are independently toggleable via `QueryExpansionConfig` or `confi
 ```python
 from retrieval.query_expansion import QueryExpander, QueryExpansionConfig
 
-cfg = QueryExpansionConfig(enable_synonyms=True, enable_llm_expansion=True, max_expansions=5)
+cfg = QueryExpansionConfig(
+    enable_synonyms=True, enable_llm_expansion=True, max_expansions=5
+)
 expander = QueryExpander(config=cfg)
 
 expanded = expander.expand("what is hybrid retrieval?")
