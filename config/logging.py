@@ -21,8 +21,6 @@ from __future__ import annotations
 import json
 import logging
 import sys
-from typing import Optional
-
 
 _DEFAULT_FMT = "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"
 _DEFAULT_DATEFMT = "%Y-%m-%dT%H:%M:%S"
@@ -31,7 +29,7 @@ _DEFAULT_DATEFMT = "%Y-%m-%dT%H:%M:%S"
 class _JsonFormatter(logging.Formatter):
     """Emit each log record as a single-line JSON object."""
 
-    def format(self, record: logging.LogRecord) -> str:  # noqa: A003
+    def format(self, record: logging.LogRecord) -> str:
         payload = {
             "time": self.formatTime(record, self.datefmt),
             "level": record.levelname,
@@ -46,7 +44,7 @@ class _JsonFormatter(logging.Formatter):
 def configure_logging(
     level: str = "INFO",
     json_format: bool = False,
-    datefmt: Optional[str] = None,
+    datefmt: str | None = None,
 ) -> None:
     """Configure the root logger with a stream handler writing to stdout.
 
@@ -65,7 +63,7 @@ def configure_logging(
     """
     numeric_level = logging.getLevelName(level.upper())
     if not isinstance(numeric_level, int):
-        raise ValueError(f"Unknown log level: {level!r}")
+        raise ValueError(f"Unknown log level: {level!r}")  # noqa: TRY004
 
     datefmt = datefmt or _DEFAULT_DATEFMT
 
